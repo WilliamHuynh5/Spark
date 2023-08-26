@@ -1,0 +1,164 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Prisma is an ORM library which wraps over a raw SQL database, allowing a developer to easily use higher level 
+// features such as TypeSafety.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  // We set an `id` variable
+  // With an `Int` type
+  // Then, we set the Prisma decorators:
+  // - @id (because it's an ID)
+  // - @default()
+  id Int @id @default(autoincrement())
+
+  // We set an `email` variable
+  // With a `String` type
+  // Then, we set the Prisma decorator:
+  // - @unique (because we want the user to be unique
+  // based on the email - two users can't have the same)
+  email String @unique
+
+  nameFirst String
+
+  nameLast String
+
+  password String // Hashed + salted in base64 encoding
+
+  // We set a `zid` variable
+  // With a `String` type
+  zId String @unique
+
+  isAdmin Boolean @default(false)
+
+  societies SocietyMember[]
+
+  activeSessions Session[]
+
+  societyApplications Application[]
+
+  attending UserAttending[]
+
+  attended UserAttended[]
+
+  resetCodes ResetCode[]
+}
+
+// This model is used to store Users' current sessions, allowing us to implement concurrency
+model Session {
+  id String @id @default(uuid()) // aka token
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+}
+
+
+model Society {
+  id Int @id @default(autoincrement())
+
+  members SocietyMember[]
+
+  name String @unique
+
+  description String @default("")
+
+  photoURL String @default("")
+
+  events Event[]
+}
+
+model SocietyMember {
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int // relation scalar field (used in the `@relation` attribute above)
+
+  role String @default("member") // "member", "moderator", "admin"
+
+  society Society @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  societyId Int // relation scalar field (used in the `@relation` attribute above)
+  @@id([userId, societyId])
+}
+
+model Application {
+  id Int @id @default(autoincrement())
+
+  applicant User @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  applicantId Int
+
+  name String @unique
+
+  description String @default("")
+
+  status String @default("pending") // "denied", "pending", "approved"
+
+  photoURL String @default("")
+}
+
+model Event {
+  id Int @id @default(autoincrement())
+
+  name String
+
+  description String
+
+  attending UserAttending[]
+
+  attended UserAttended[]
+
+  forms Form[]
+
+  time DateTime
+
+  location String
+
+  society Society @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  societyId Int
+}
+
+model UserAttending {
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int // relation scalar field (used in the `@relation` attribute above)
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId Int // relation scalar field (used in the `@relation` attribute above)
+  @@id([userId, eventId])
+}
+
+model UserAttended {
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int // relation scalar field (used in the `@relation` attribute above)
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId Int // relation scalar field (used in the `@relation` attribute above)
+  @@id([userId, eventId])
+}
+
+model ResetCode {
+  id String @id @default(uuid())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+}
+
+model Form {
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId Int
+
+  zId String
+
+  nameFirst String
+
+  nameLast String
+
+  email String
+
+  @@id([eventId, zId, email]) // A student can attend multiple events
+}

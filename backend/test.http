@@ -1,0 +1,128 @@
+@token = {{login.response.body.$.token}}
+@hostname = localhost
+@port = 3000
+@url = http://{{hostname}}:{{port}}
+@email = user0@test.io
+@password = password
+@siteAdminToken = 7b00f0f5-beb4-487f-95c1-93a60504ebd7
+@societyId = 2
+@userId = {{profile.response.body.$.userId}}
+
+POST {{url}}/auth/register HTTP/1.1
+content-type: application/json
+
+{
+    "email": "{{email}}",
+    "nameFirst": "Test",
+    "nameLast": "User",
+    "zId": "z5363681",
+    "password": "{{password}}"
+}
+###
+# @name login
+POST {{url}}/auth/login HTTP/1.1
+content-type: application/json
+
+{
+    "email": "{{email}}",
+    "password": "{{password}}"
+}
+
+###
+# @name profile
+GET {{url}}/profile/view
+    ?token={{token}}
+
+###
+@socAdminToken={{socAdminLogin.response.body.$.token}}
+
+# @name socAdminLogin
+POST {{url}}/auth/login HTTP/1.1
+content-type: application/json
+
+{
+    "email": "user1@test.io",
+    "password": "{{password}}"
+}
+
+###
+# @name socAdminProfile
+GET {{url}}/profile/view
+    ?token={{socAdminToken}}
+
+###
+GET {{url}}/society/list HTTP/1.1
+
+
+###
+GET {{url}}/society/view
+    ?societyId={{societyId}}
+
+###
+POST {{url}}/society/join
+Content-Type: application/json
+
+{
+    "token": "{{token}}",
+    "societyId": {{societyId}}
+}
+
+###
+POST {{url}}/perm/society/allocate
+Content-Type: application/json
+
+{
+    "token": "{{socAdminToken}}",
+    "userId": {{userId}},
+    "permLevel": 2,
+    "societyId": {{societyId}}
+}
+
+
+###
+GET {{url}}/society/members?societyId={{societyId}}
+
+###
+PUT {{url}}/society/edit
+Content-Type: application/json
+
+{
+    "token": "{{socAdminToken}}",
+    "societyId": {{societyId}},
+    "societyName": "new name",
+    "description": "new description"
+}
+
+###
+POST {{url}}/auth/logout
+Content-Type: application/json
+
+{
+    "token": "Cokca"
+}
+###
+GET {{url}}/auth/reset?email=admin@test.io
+
+###
+POST {{url}}/auth/reset
+Content-Type: application/json
+
+{
+    "code": "IIDAGC",
+    "password": "newPassword"
+}
+
+###
+@siteAdminEmail=admin@test.io
+@siteAdminPassword=newPassword
+# @name siteAdminLogin
+POST {{url}}/auth/login HTTP/1.1
+content-type: application/json
+
+{
+    "email": "{{siteAdminEmail}}",
+    "password": "{{siteAdminPassword}}"
+}
+
+###
+GET {{url}}/events

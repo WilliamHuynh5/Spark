@@ -1,0 +1,46 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src"],
+  "typedocOptions": {
+    "name": "api",
+    "readme": "./src/api/README.md",
+    "entryPointStrategy": "expand",
+    "entryPoints": [
+      "./src/api/index.ts",
+      "./src/api/auth.ts",
+      "./src/api/event.ts",
+      "./src/api/profile.ts",
+      "./src/api/society.ts",
+      "./src/api/admin/index.ts",
+      "./src/api/admin/application.ts",
+      "./src/api/admin/user.ts",
+      "./src/api/perm/index.ts",
+      "./src/api/perm/site.ts",
+      "./src/api/perm/society.ts",
+      "./src/api/utils/apiTypes.ts",
+      "./src/api/utils/interfaces.ts"
+    ],
+    "out": "./api-docs"
+  },
+  "references": [{ "path": "./tsconfig.node.json" }]
+}
